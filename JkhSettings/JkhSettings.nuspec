@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <files>
-    <file src="bin\Debug\JkhSettings.dll" target="lib\net40\JkhSettings.dll" />
-  </files>
   <metadata>
     <id>JkhSettings</id>
     <title>JkhSettings - Some utilities for a custom and dynamic settings file</title>
