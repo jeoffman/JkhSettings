@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <files>
-    <file src="JkhSettings\bin\Debug\JkhSettings.dll" target="lib\net40\JkhSettings.dll" />
+    <file src="bin\Debug\JkhSettings.dll" target="lib\net40\JkhSettings.dll" />
   </files>
   <metadata>
     <id>JkhSettings</id>
@@ -19,7 +19,7 @@
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
-      **Ver 0.9.0 = NuGet
+      **Ver 0.9.x = NuGet
     </releaseNotes>
   </metadata>
 </package>
