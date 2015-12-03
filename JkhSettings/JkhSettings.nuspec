@@ -14,12 +14,14 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>JkhSettings by Jeoffman</description>
     <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Configuration" />
       <frameworkAssembly assemblyName="System.Drawing" />
+      <frameworkAssembly assemblyName="System.Windows.Forms" />
       <frameworkAssembly assemblyName="System.Xml" />
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
-      **Ver 0.9.x = NuGet
+      **Ver 0.9.1 = Added FormAbout, RichTextBoxHelper, and TraceListenerRtf
     </releaseNotes>
   </metadata>
 </package>
