@@ -12,15 +12,23 @@ using System.Windows.Forms;
 
 namespace ExampleWindowsFormsApplicationSettings
 {
-	public partial class Form1 : Form
+	public partial class FormMain : Form
 	{
-		public Form1()
+		private TraceSource _traceSource = new TraceSource("MyTraceSource");
+
+		public FormMain()
 		{
 			InitializeComponent();
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
+		private void FormMain_Load(object sender, EventArgs e)
 		{
+			TraceListenerRtf myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+			myListener.LogLevel = TraceEventType.Verbose;
+
+			comboBoxTraceLevel.DataSource = Enum.GetNames(typeof(TraceEventType));
+			comboBoxSwitchValue.DataSource = Enum.GetNames(typeof(SourceLevels));
+
 			using(MySettings settings = new MySettings())
 			{
 				string myValue = settings.GetSetting<string>("MySettingName1", "MySettingValueDefault1");
@@ -60,15 +68,23 @@ namespace ExampleWindowsFormsApplicationSettings
 
 				settings.RestoreWindowPlacement(this);
 				settings.RestoreColumnWidths(listView1);
-            }
+
+				splitContainer1.SplitterDistance = settings.GetSetting(MySettings.SplitterDistanceName, MySettings.SplitterDistanceDefaultValue);
+				textBoxTraceText.Text = settings.GetSetting(MySettings.TraceTextName, MySettings.TraceTextDefaultValue);
+
+				comboBoxTraceLevel.SelectedItem = settings.GetSetting(MySettings.TraceLevelName, MySettings.TraceLevelDefaultValue);
+				comboBoxSwitchValue.SelectedItem = settings.GetSetting(MySettings.SwitchValueName, MySettings.SwitchValueDefaultValue);
+			}
 		}
 
-		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+		private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			using(MySettings settings = new MySettings())
 			{
 				settings.SaveWindowPlacement(this);
 				settings.SaveColumnWidths(listView1);
+
+				settings.PutSetting(MySettings.SplitterDistanceName, splitContainer1.SplitterDistance);
 			}
 		}
 
@@ -90,13 +106,31 @@ namespace ExampleWindowsFormsApplicationSettings
 			Val2,
 			Enum3
 		}
+
+		private void toolStripButtonAbout_Click(object sender, EventArgs e)
+		{
+			using(FormAbout dlg = new FormAbout())
+			{
+				dlg.ShowDialog(this);
+			}
+		}
+
+		private void buttonTrace_Click(object sender, EventArgs e)
+		{
+			TraceEventType eventTypeFromCombo = (TraceEventType)Enum.Parse(typeof(TraceEventType), comboBoxTraceLevel.SelectedItem.ToString());
+			_traceSource.TraceEvent(eventTypeFromCombo, 57, textBoxTraceText.Text);
+		}
+
+		private void comboBoxSwitchValue_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			SourceLevels eventTypeFromCombo = (SourceLevels)Enum.Parse(typeof(SourceLevels), comboBoxSwitchValue.SelectedItem.ToString());
+			SetTraceLevel(eventTypeFromCombo);
+		}
+
+		private void SetTraceLevel(SourceLevels eventTypeFromCombo)
+		{
+			TraceListenerRtf.SetTraceSourceLevel("MyTraceSource", eventTypeFromCombo);
+			//throw new NotImplementedException();
+		}
 	}
-
-	class MySettings : CustomSettingsBase
-	{
-		public const string SomeSettingName = "SomeSettingName";
-		public const double SomeSettingDefaultValue = 1.1;
-
-	}
-
 }

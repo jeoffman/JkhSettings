@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>JkhSettings</id>
+    <title>JkhSettings - Some utilities for a custom and dynamic settings file</title>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <owners>Jeoffman</owners>
+    <projectUrl>https://github.com/jeoffman/JkhSettings</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/jeoffman/JkhSettings/master/ExampleWindowsFormsApplicationSettings/Resources/JkhSettings32x32.png?raw=true</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>JkhSettings by Jeoffman</description>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Configuration" />
+      <frameworkAssembly assemblyName="System.Drawing" />
+      <frameworkAssembly assemblyName="System.Windows.Forms" />
+      <frameworkAssembly assemblyName="System.Xml" />
+    </frameworkAssemblies>
+    <tags>JkhSettings Jeoffman WinForms</tags>
+    <releaseNotes>
+      **Ver 0.9.2 = Refactoring, set Trace Level filter
+      **Ver 0.9.1 = Added FormAbout, RichTextBoxHelper, and TraceListenerRtf
+    </releaseNotes>
+  </metadata>
+</package>

@@ -924,7 +924,7 @@ namespace JkhSettings
 
 #region Encrypted String
 #if !SETTINGS_NO_SQL_ENCRYPT
-		/// <summary>Decrypts ConnectionString password after reading it from settings</summary>
+		/// <summary>Decrypts ConnectionString password after reading it from settings, WARN: any script kiddie can "crack" this - you have been warned!</summary>
 		public string GetSqlConnectionString(string xmlPath, string defaultValue)
 		{
 			string retval = GetSetting(xmlPath, defaultValue);
@@ -945,7 +945,7 @@ namespace JkhSettings
 			return retval;
 		}
 
-		/// <summary>Encrypts ConnectionString password before writing it to settings</summary>
+		/// <summary>Encrypts ConnectionString password before writing it to settings, WARN: any script kiddie can "crack" this - you have been warned!</summary>
 		public void PutSqlConnectionString(string xmlPath, string connectionString)
 		{
 			SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
@@ -957,13 +957,4 @@ namespace JkhSettings
 #endif  //SETTINGS_NO_SQL_ENCRYPT
 #endregion Encrypted String
 	}
-
-	public interface IJkhColumnWidthSettings
-	{
-		string ColumnWidthsToString();
-		bool RestoreColumnWidths(int[] widths);
-	}
-
-	public delegate string CustomSettingsXmlSaveColumnWidths();
-	public delegate bool CustomSettingsXmlRestoreColumnWidths(int[] widths);
 }
