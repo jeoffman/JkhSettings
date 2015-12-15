@@ -31,6 +31,8 @@ namespace JkhSettings
 {
 	public class CustomSettingsBase : IDisposable
 	{
+		private TraceSource _traceSource = new TraceSource("JkhSettings");
+
 		private const string _MagicalDefualtStringFromHell = "!@#$%^&*()0-987654321~`";
 		private const string SettingsFileName = "settings.xml";
 		private const string EmptySettingsFile = "<settings></settings>";
@@ -81,7 +83,7 @@ namespace JkhSettings
 			}
 			catch(Exception exc)
 			{
-				Debug.WriteLine("CustomSettingsBase() Exception: " + exc.Message);
+				_traceSource.TraceEvent(TraceEventType.Error, 57, "CustomSettingsBase() Exception: " + exc.Message);
 
 				xmlDocument.LoadXml(EmptySettingsFile);
 				DocumentPath = settingsDocumentPath;
@@ -113,7 +115,7 @@ namespace JkhSettings
 			}
 			catch(FileNotFoundException exc)
 			{
-				Debug.WriteLine("CustomSettingsBase() Exception: " + exc.Message);
+				_traceSource.TraceEvent(TraceEventType.Error, 57, "CustomSettingsBase() Exception: " + exc.Message);
 
 				xmlDocument.LoadXml(EmptySettingsFile);
 				DocumentPath = settingsDocumentPath;
@@ -186,10 +188,18 @@ namespace JkhSettings
 //				if(valueType.ToString().Contains("Dictionary")) //if this one FIRST because a dictionary is a generic
 //					retval = GetDictionary(xmlNode.InnerText, defaultValue);
 //				else 
-				if(valueType.IsArray || valueType.IsGenericType)
-					retval = (T)GetArray<T>(xmlNode.InnerText);
-				else
-					retval = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xmlNode.InnerText);
+				try
+				{
+					if(valueType.IsArray || valueType.IsGenericType)
+						retval = (T)GetArray<T>(xmlNode.InnerText);
+					else
+						retval = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xmlNode.InnerText);
+				}
+				catch(InvalidOperationException exc)
+				{
+					_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting<{valueType}> Exception: {exc.Message}");
+					retval = defaultValue;
+				}
 			}
 			else
 			{
@@ -485,7 +495,7 @@ namespace JkhSettings
 			}
 			catch(Exception exc)
 			{
-				Debug.WriteLine("RestoreWindowPlacement Exception: " + exc.Message);
+				_traceSource.TraceEvent(TraceEventType.Error, 57, "RestoreWindowPlacement Exception: " + exc.Message);
 			}
 		}
 
@@ -838,8 +848,7 @@ namespace JkhSettings
 					}
 					else
 					{
-						Debug.WriteLine("CustomSettingsXML-RestoreColumnWidths too many initializers for " + GetControlUniversalName(dataGridView));
-						//Debug.Assert(false);
+						_traceSource.TraceEvent(TraceEventType.Error, 57, "CustomSettingsXML-RestoreColumnWidths too many initializers for " + GetControlUniversalName(dataGridView));
 						break;	// too many initializers!
 					}
 				}
@@ -936,11 +945,11 @@ namespace JkhSettings
 			}
 			catch(FormatException exc)
 			{
-				Debug.WriteLine("!!!!!GetSqlConnectionString EXCEPTION: " + exc.Message);
+				_traceSource.TraceEvent(TraceEventType.Error, 57, "!!!!!GetSqlConnectionString EXCEPTION: " + exc.Message);
 			}
 			catch(ArgumentException exc)
 			{
-				Debug.WriteLine("!!!!!GetSqlConnectionString EXCEPTION: " + exc.Message);
+				_traceSource.TraceEvent(TraceEventType.Error, 57, "!!!!!GetSqlConnectionString EXCEPTION: " + exc.Message);
 			}
 			return retval;
 		}

@@ -19,5 +19,8 @@ namespace ExampleWindowsFormsApplicationSettings
 
 		public const string SwitchValueName = "SwitchValue";
 		public const string SwitchValueDefaultValue = "Warning";
+
+		public const string MyArrayName = "MyArray";
+		public readonly string[] MyArrayDefault = { };
 	}
 }

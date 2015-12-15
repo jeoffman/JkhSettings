@@ -66,6 +66,10 @@ namespace ExampleWindowsFormsApplicationSettings
 				settings.PutSetting("MyEnum", MyEnum.Enum3);
 				MyEnum myEnum = settings.GetSetting("MyEnum", MyEnum.Value1);
 
+				string[] myArray = settings.GetSetting(MySettings.MyArrayName, settings.MyArrayDefault);
+				settings.PutSetting(MySettings.MyArrayName, new string[] { });
+				string[] myArray2 = settings.GetSetting(MySettings.MyArrayName, settings.MyArrayDefault);
+
 				settings.RestoreWindowPlacement(this);
 				settings.RestoreColumnWidths(listView1);
 
@@ -74,6 +78,7 @@ namespace ExampleWindowsFormsApplicationSettings
 
 				comboBoxTraceLevel.SelectedItem = settings.GetSetting(MySettings.TraceLevelName, MySettings.TraceLevelDefaultValue);
 				comboBoxSwitchValue.SelectedItem = settings.GetSetting(MySettings.SwitchValueName, MySettings.SwitchValueDefaultValue);
+
 			}
 		}
 
