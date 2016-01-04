@@ -18,6 +18,7 @@
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
+      **Ver 0.9.4 = Fix some settings with invalid XML element names (can't start with a number and no spaces)
       **Ver 0.9.3 = bugfix for invalid string[] format, add TraceSource
       **Ver 0.9.2 = Refactoring, set Trace Level filter
       **Ver 0.9.1 = Added FormAbout, RichTextBoxHelper, and TraceListenerRtf
