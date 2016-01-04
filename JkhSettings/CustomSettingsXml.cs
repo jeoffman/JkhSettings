@@ -18,6 +18,7 @@ using System.Data.SqlClient;
 
 #if !SETTINGS_NO_WINFORMS
 using System.Windows.Forms;
+using System.Xml.XPath;
 #endif
 
 #if !SETTINGS_NO_DRAWING
@@ -125,23 +126,43 @@ namespace JkhSettings
 
 		private XmlNode CreateMissingNode(string xmlPath)
 		{
+			xmlPath = NormalizeXmlPathJkh(xmlPath);
+
 			string[] xPathSections = xmlPath.Split('/');
 			StringBuilder currentXPath = new StringBuilder();
 			XmlNode testNode = null;
 			XmlNode currentNode = xmlDocument.SelectSingleNode("settings");
-			if(currentNode == null) {
+			if(currentNode == null)
+			{
 				xmlDocument.LoadXml(EmptySettingsFile);
 				currentNode = xmlDocument.SelectSingleNode("settings");
 			}
-			foreach(string xPathSection in xPathSections) {
+			foreach(string xPathSection in xPathSections)
+			{
 				currentXPath.Append(xPathSection);
-				testNode = xmlDocument.SelectSingleNode(currentXPath.ToString());
-				if(testNode == null) {
-					currentNode.InnerXml += "<" +
-								xPathSection + "></" +
-								xPathSection + ">";
+
+				try
+				{
+					testNode = xmlDocument.SelectSingleNode(currentXPath.ToString());
 				}
-				currentNode = xmlDocument.SelectSingleNode(currentXPath.ToString());
+				catch(XPathException exc)
+				{
+					_traceSource.TraceEvent(TraceEventType.Error, 57, $"CreateMissingNode({xmlPath}) Exception: {exc.Message}");
+				}
+
+				if(testNode == null)
+				{
+					currentNode.InnerXml += "<" + xPathSection + "></" + xPathSection + ">";
+				}
+
+				try
+				{
+					currentNode = xmlDocument.SelectSingleNode(currentXPath.ToString());
+				}
+				catch(XPathException exc)
+				{
+					_traceSource.TraceEvent(TraceEventType.Error, 57, $"CreateMissingNode({xmlPath}) Exception: {exc.Message}");
+				}
 				currentXPath.Append("/");
 			}
 			return currentNode;
@@ -181,28 +202,38 @@ namespace JkhSettings
 		public T GetSetting<T>(string xmlPath, T defaultValue)
 		{
 			T retval;
-			XmlNode xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
-			if(xmlNode != null)
+			try
 			{
-				Type valueType = typeof(T);
-//				if(valueType.ToString().Contains("Dictionary")) //if this one FIRST because a dictionary is a generic
-//					retval = GetDictionary(xmlNode.InnerText, defaultValue);
-//				else 
-				try
+				xmlPath = NormalizeXmlPathJkh(xmlPath);
+
+				XmlNode xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
+				if(xmlNode != null)
 				{
-					if(valueType.IsArray || valueType.IsGenericType)
-						retval = (T)GetArray<T>(xmlNode.InnerText);
-					else
-						retval = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xmlNode.InnerText);
+					Type valueType = typeof(T);
+	//				if(valueType.ToString().Contains("Dictionary")) //if this one FIRST because a dictionary is a generic
+	//					retval = GetDictionary(xmlNode.InnerText, defaultValue);
+	//				else 
+					try
+					{
+						if(valueType.IsArray || valueType.IsGenericType)
+							retval = (T)GetArray<T>(xmlNode.InnerText);
+						else
+							retval = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xmlNode.InnerText);
+					}
+					catch(InvalidOperationException exc)
+					{
+						_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting<{valueType}> Exception: {exc.Message}");
+						retval = defaultValue;
+					}
 				}
-				catch(InvalidOperationException exc)
+				else
 				{
-					_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting<{valueType}> Exception: {exc.Message}");
 					retval = defaultValue;
 				}
 			}
-			else
+			catch(XPathException exc)
 			{
+				_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting({xmlPath}) Exception: {exc.Message}");
 				retval = defaultValue;
 			}
 			return retval;
@@ -213,7 +244,18 @@ namespace JkhSettings
 			if(value == null)
 				throw new ArgumentNullException(nameof(value));
 
-            XmlNode xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
+			xmlPath = NormalizeXmlPathJkh(xmlPath);
+
+			XmlNode xmlNode = null;
+			try
+			{
+				xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
+			}
+			catch(XPathException exc)
+			{
+				_traceSource.TraceEvent(TraceEventType.Error, 57, $"PutSetting({xmlPath}) Exception: {exc.Message}");
+			}
+
 			if(xmlNode == null)
 				xmlNode = CreateMissingNode(SettingsNode + xmlPath);
 
@@ -231,6 +273,17 @@ namespace JkhSettings
 				xmlDocument.Save(DocumentPath);
 				//_watcher.EnableRaisingEvents = true;
 			}
+		}
+
+		private string NormalizeXmlPathJkh(string xmlPath)
+		{
+			if(xmlPath == null)
+				throw new ArgumentNullException(nameof(xmlPath));
+
+			if(Char.IsNumber(xmlPath[0]))
+				xmlPath = "num" + xmlPath;
+			xmlPath = xmlPath.Replace(" ", "");
+			return xmlPath;
 		}
 
 		private static T GetArray<T>(string innerText)
@@ -936,6 +989,8 @@ namespace JkhSettings
 		/// <summary>Decrypts ConnectionString password after reading it from settings, WARN: any script kiddie can "crack" this - you have been warned!</summary>
 		public string GetSqlConnectionString(string xmlPath, string defaultValue)
 		{
+			xmlPath = NormalizeXmlPathJkh(xmlPath);
+
 			string retval = GetSetting(xmlPath, defaultValue);
 			SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(retval);
 			try
@@ -957,6 +1012,8 @@ namespace JkhSettings
 		/// <summary>Encrypts ConnectionString password before writing it to settings, WARN: any script kiddie can "crack" this - you have been warned!</summary>
 		public void PutSqlConnectionString(string xmlPath, string connectionString)
 		{
+			xmlPath = NormalizeXmlPathJkh(xmlPath);
+
 			SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
 			if(builder.Password.Length == 0)
 				builder.Password = "1234";	// an example of a very bad password!

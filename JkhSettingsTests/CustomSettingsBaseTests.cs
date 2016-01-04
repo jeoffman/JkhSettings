@@ -56,13 +56,17 @@ namespace Jkh.CustomSettingsXml.Tests
 			settings.PutSetting("MyArray", new int[] { 1,2,3,4 } );
 			settings.PutSetting("MyColor", Color.Red);
 			settings.PutSetting("MyGUID", Guid.NewGuid());
+			settings.PutSetting("5 Bad Xml Element Name", 1);
 			settings.Dispose();
 		}
 
 		[TestMethod()]
 		public void GetSettingTest()
 		{
-			//Assert.Fail();	TODO
+			MySettingsUser settings = new MySettingsUser();
+			settings.PutSetting("5 Bad Xml Element Name", 100);
+			Assert.AreEqual(100, settings.GetSetting("5 Bad Xml Element Name", 1));
+			settings.Dispose();
 		}
 
 		[TestMethod()]
