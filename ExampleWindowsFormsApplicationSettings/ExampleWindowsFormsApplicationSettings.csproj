@@ -92,6 +92,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Resources\About.png" />
+    <Content Include="Resources\JkhSettings screen shot.png" />
     <Content Include="Resources\JkhSettings32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
