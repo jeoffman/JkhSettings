@@ -12,12 +12,14 @@
     <description>JkhSettings by Jeoffman</description>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Configuration" />
+      <frameworkAssembly assemblyName="System.Data" />
       <frameworkAssembly assemblyName="System.Drawing" />
       <frameworkAssembly assemblyName="System.Windows.Forms" />
       <frameworkAssembly assemblyName="System.Xml" />
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
+      **Ver 0.9.5 = Prefix trace output with date+time
       **Ver 0.9.4 = Fix some settings with invalid XML element names (can't start with a number and no spaces)
       **Ver 0.9.3 = bugfix for invalid string[] format, add TraceSource
       **Ver 0.9.2 = Refactoring, set Trace Level filter

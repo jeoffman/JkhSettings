@@ -329,7 +329,7 @@ namespace JkhSettings
 //				retval[datum.Key] = datum.Value;
 //			return retval;
 		}
-//
+
 		private string PutDictionary(IDictionary value)
 		{
 			Debug.Assert(false);    //I wish I was cool...

@@ -251,7 +251,7 @@ namespace JkhSettings
 		{
 			if(Enabled)
 			{
-				RichTextBoxHelper.AppendStyle(RichTextBoxOutput, newStyle, colorFore, colorBack, text);
+				RichTextBoxHelper.AppendStyle(RichTextBoxOutput, newStyle, colorFore, colorBack, DateTime.Now.ToString(CultureInfo.CurrentCulture) + " - " + text);
 			}
 		}
 
