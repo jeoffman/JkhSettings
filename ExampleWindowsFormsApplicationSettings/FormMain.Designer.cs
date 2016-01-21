@@ -46,6 +46,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.comboBoxSwitchValue = new System.Windows.Forms.ComboBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.checkBoxHookUpTraceListener = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -65,6 +66,7 @@
 			this.listView1.Name = "listView1";
 			this.listView1.Size = new System.Drawing.Size(435, 98);
 			this.listView1.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.listView1, "Resize the colums, restored next time you run the app");
 			this.listView1.UseCompatibleStateImageBehavior = false;
 			this.listView1.View = System.Windows.Forms.View.Details;
 			// 
@@ -181,11 +183,25 @@
 			this.toolTip1.SetToolTip(this.comboBoxSwitchValue, "Set the TraceSource named \"MyTraceSource\" switch level");
 			this.comboBoxSwitchValue.SelectedIndexChanged += new System.EventHandler(this.comboBoxSwitchValue_SelectedIndexChanged);
 			// 
+			// checkBoxHookUpTraceListener
+			// 
+			this.checkBoxHookUpTraceListener.AutoSize = true;
+			this.checkBoxHookUpTraceListener.Checked = true;
+			this.checkBoxHookUpTraceListener.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxHookUpTraceListener.Location = new System.Drawing.Point(342, 58);
+			this.checkBoxHookUpTraceListener.Name = "checkBoxHookUpTraceListener";
+			this.checkBoxHookUpTraceListener.Size = new System.Drawing.Size(102, 17);
+			this.checkBoxHookUpTraceListener.TabIndex = 10;
+			this.checkBoxHookUpTraceListener.Text = "Listen to Traces";
+			this.checkBoxHookUpTraceListener.UseVisualStyleBackColor = true;
+			this.checkBoxHookUpTraceListener.CheckedChanged += new System.EventHandler(this.checkBoxHookUpTraceListener_CheckedChanged);
+			// 
 			// FormMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(459, 302);
+			this.Controls.Add(this.checkBoxHookUpTraceListener);
 			this.Controls.Add(this.comboBoxSwitchValue);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.textBoxTraceText);
@@ -227,6 +243,7 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ComboBox comboBoxSwitchValue;
 		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.CheckBox checkBoxHookUpTraceListener;
 	}
 }
 

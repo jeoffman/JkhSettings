@@ -16,6 +16,8 @@ namespace ExampleWindowsFormsApplicationSettings
 	{
 		private TraceSource _traceSource = new TraceSource("MyTraceSource");
 
+		TraceListenerRtf myListener;
+
 		public FormMain()
 		{
 			InitializeComponent();
@@ -23,7 +25,7 @@ namespace ExampleWindowsFormsApplicationSettings
 
 		private void FormMain_Load(object sender, EventArgs e)
 		{
-			TraceListenerRtf myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+			myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
 			myListener.LogLevel = TraceEventType.Verbose;
 
 			comboBoxTraceLevel.DataSource = Enum.GetNames(typeof(TraceEventType));
@@ -136,6 +138,14 @@ namespace ExampleWindowsFormsApplicationSettings
 		{
 			TraceListenerRtf.SetTraceSourceLevel("MyTraceSource", eventTypeFromCombo);
 			//throw new NotImplementedException();
+		}
+
+		private void checkBoxHookUpTraceListener_CheckedChanged(object sender, EventArgs e)
+		{
+			if(checkBoxHookUpTraceListener.Checked)
+				TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+			else
+				TraceListenerRtf.UninstallTraceListener(myListener);
 		}
 	}
 }

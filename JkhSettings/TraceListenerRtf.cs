@@ -30,6 +30,7 @@ namespace JkhSettings
 
 		//based on: http://stackoverflow.com/questions/3303126/how-to-get-the-value-of-private-field-in-c
 		//		and http://stackoverflow.com/questions/23664573/tracesource-and-tracelistener-quietly-fail-to-do-anything
+		// safe to call multiple times
 		private static void AttachToAllTraceSources(TraceListener yourListener)
 		{
 			List<string> sourceList = new List<string>();
@@ -44,7 +45,7 @@ namespace JkhSettings
 					TraceSource source = (weakReference.Target as TraceSource);
 					if(source != null && source.Name != "foo")
 					{
-						if(!source.Listeners.Contains(yourListener))	//NOTE: this doesn't actually work... it will ALWAYS add this listener!
+						if(!source.Listeners.Contains(yourListener))	//This works after overriding Equals()
 						{
 							source.Listeners.Add(yourListener);
 							sourceList.Add(source.Name);
@@ -55,6 +56,55 @@ namespace JkhSettings
 			
 			_traceSource.TraceEvent(TraceEventType.Information, 57, "Jkh.TraceListenerRtf is listening to : {0}", string.Join(",",sourceList));
 		}
+
+		public static void UninstallTraceListener(TraceListenerRtf myListener)
+		{
+			RemoveFromAllTraceSources(myListener);
+		}
+
+		private static void RemoveFromAllTraceSources(TraceListener yourListener)
+		{
+			List<string> sourceList = new List<string>();
+
+			TraceSource ts = new TraceSource("foo");
+			List<WeakReference> list = (List<WeakReference>)GetInstanceField(typeof(TraceSource), ts, "tracesources");
+			for(int count = 0; count < list.Count; count++)
+			{
+				WeakReference weakReference = list[count];
+				if(weakReference.IsAlive)
+				{
+					TraceSource source = (weakReference.Target as TraceSource);
+					if(source != null && source.Name != "foo")
+					{
+						if(source.Listeners.Contains(yourListener))    //This works after overriding Equals()
+						{
+							source.Listeners.Remove(yourListener);
+							sourceList.Add(source.Name);
+						}
+					}
+				}
+			}
+
+			_traceSource.TraceEvent(TraceEventType.Information, 57, "Jkh.TraceListenerRtf is removed from : {0}", string.Join(",", sourceList));
+		}
+
+		#region Override Equals et al
+		public override bool Equals(object obj)
+		{
+			bool retval = false;
+			TraceListenerRtf item = obj as TraceListenerRtf;
+
+			if(item != null)
+				retval = (this.RichTextBoxOutput.Equals(item.RichTextBoxOutput));
+
+			return retval;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+		#endregion Override Equala et al
 
 		internal static object GetInstanceField(Type type, object instance, string fieldName)
 		{
