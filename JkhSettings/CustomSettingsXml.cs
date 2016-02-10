@@ -42,7 +42,17 @@ namespace JkhSettings
 		private const string RelativeWindowPlacementSuffix = "_RelativeBounds";
 		private const string SizeSuffix = "_Size";
 		private const string ColumnWidthsSuffix = "_ColumnWidths";
-		
+
+		public static string DefaultUserSettingsFilePath
+		{
+			get
+			{
+				string workingDirectory = Directory.GetParent(Application.LocalUserAppDataPath).ToString();
+				string settingsDocumentPath = Path.Combine(workingDirectory, SettingsFileName);
+				return settingsDocumentPath;
+			}
+		}
+
 		XmlDocument xmlDocument = new XmlDocument();
 #if !SETTINGS_NO_WINFORMS
 		Dictionary<string, Control> Bindings = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);

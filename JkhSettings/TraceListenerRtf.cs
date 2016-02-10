@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Linq;
 
 
 namespace JkhSettings
@@ -53,6 +54,7 @@ namespace JkhSettings
 					}
 				}
 			}
+			ts.Close();
 			
 			_traceSource.TraceEvent(TraceEventType.Information, 57, "Jkh.TraceListenerRtf is listening to : {0}", string.Join(",",sourceList));
 		}

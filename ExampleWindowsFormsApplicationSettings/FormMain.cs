@@ -15,6 +15,7 @@ namespace ExampleWindowsFormsApplicationSettings
 	public partial class FormMain : Form
 	{
 		private TraceSource _traceSource = new TraceSource("MyTraceSource");
+		private TraceSource _traceSource2 = new TraceSource("MySecondTraceSource");
 
 		TraceListenerRtf myListener;
 
@@ -25,8 +26,7 @@ namespace ExampleWindowsFormsApplicationSettings
 
 		private void FormMain_Load(object sender, EventArgs e)
 		{
-			myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
-			myListener.LogLevel = TraceEventType.Verbose;
+//			myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
 
 			comboBoxTraceLevel.DataSource = Enum.GetNames(typeof(TraceEventType));
 			comboBoxSwitchValue.DataSource = Enum.GetNames(typeof(SourceLevels));
@@ -81,6 +81,14 @@ namespace ExampleWindowsFormsApplicationSettings
 				comboBoxTraceLevel.SelectedItem = settings.GetSetting(MySettings.TraceLevelName, MySettings.TraceLevelDefaultValue);
 				comboBoxSwitchValue.SelectedItem = settings.GetSetting(MySettings.SwitchValueName, MySettings.SwitchValueDefaultValue);
 
+				Task t = Task.Run(async delegate
+				{
+					await Task.Delay(TimeSpan.FromSeconds(5));
+					_traceSource2.TraceEvent(TraceEventType.Information, 57, "Second add:");
+					myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+					myListener.LogLevel = TraceEventType.Verbose;
+					_traceSource.TraceEvent(TraceEventType.Information, 57, "Added after 5 seconds");
+				});
 			}
 		}
 
@@ -90,6 +98,9 @@ namespace ExampleWindowsFormsApplicationSettings
 			{
 				settings.SaveWindowPlacement(this);
 				settings.SaveColumnWidths(listView1);
+
+				settings.PutSetting(MySettings.TraceLevelName, comboBoxTraceLevel.SelectedItem);
+				settings.PutSetting(MySettings.SwitchValueName, comboBoxSwitchValue.SelectedItem);
 
 				settings.PutSetting(MySettings.SplitterDistanceName, splitContainer1.SplitterDistance);
 			}
@@ -126,6 +137,7 @@ namespace ExampleWindowsFormsApplicationSettings
 		{
 			TraceEventType eventTypeFromCombo = (TraceEventType)Enum.Parse(typeof(TraceEventType), comboBoxTraceLevel.SelectedItem.ToString());
 			_traceSource.TraceEvent(eventTypeFromCombo, 57, textBoxTraceText.Text);
+			_traceSource2.TraceEvent(eventTypeFromCombo, 57, "#2" + textBoxTraceText.Text);
 		}
 
 		private void comboBoxSwitchValue_SelectedIndexChanged(object sender, EventArgs e)
@@ -143,9 +155,19 @@ namespace ExampleWindowsFormsApplicationSettings
 		private void checkBoxHookUpTraceListener_CheckedChanged(object sender, EventArgs e)
 		{
 			if(checkBoxHookUpTraceListener.Checked)
-				TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+			{
+				myListener = TraceListenerRtf.InstallTraceListener(richTextBoxTraces);
+				myListener.LogLevel = TraceEventType.Verbose;
+			}
 			else
-				TraceListenerRtf.UninstallTraceListener(myListener);
+			{
+				if(myListener != null)
+				{
+					TraceListenerRtf.UninstallTraceListener(myListener);
+					myListener.Dispose();
+					myListener = null;
+				}
+			}
 		}
 	}
 }

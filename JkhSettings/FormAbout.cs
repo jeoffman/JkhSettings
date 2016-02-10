@@ -99,19 +99,26 @@ namespace JkhSettings
 		//a pecking-order search for where the settings are stored...
 		private void buttonBrowseSettings_Click(object sender, EventArgs e)
 		{
-			//Are you missing a reference to System.Configuration?
-			Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
-			if(File.Exists(config.FilePath))
+			//1) are you using JkhSettings?
+			if(File.Exists(CustomSettingsBase.DefaultUserSettingsFilePath))
 			{
-				ShowExplorer(config.FilePath);
+				ShowExplorer(CustomSettingsBase.DefaultUserSettingsFilePath);
 			}
 			else
-			{
-				config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
+			{	//2) too bad, maybe just regular .NET settings?
+				Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);//Are you missing a reference to System.Configuration?
 				if(File.Exists(config.FilePath))
+				{
 					ShowExplorer(config.FilePath);
+				}
 				else
-					ShowExplorer(Application.LocalUserAppDataPath);
+				{	//3) plain old app.config stuff?
+					config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
+					if(File.Exists(config.FilePath))
+						ShowExplorer(config.FilePath);
+					else
+						ShowExplorer(Application.LocalUserAppDataPath);
+				}
 			}
 		}
 
