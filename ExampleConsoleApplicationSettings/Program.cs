@@ -27,6 +27,13 @@ namespace ExampleConsoleApplicationSettings
 
 				string myValue2 = settings.GetSetting<string>("MySettingName2", "MySettingValueDefault2");
 				double myValueDouble2 = settings.GetSetting(MySettings.SomeSettingName, MySettings.SomeSettingDefaultValue);
+
+				string secret = "secret password";
+
+				string unencryptedDefault = settings.GetEncryptedSetting(secret, "MyEncryptedSettingName", "MyEncryptedSettingValueDefault");
+				settings.PutEncryptedSetting(secret, "MyEncryptedSettingName", "blah blah blah secrets");
+				string encryptedText = settings.GetSetting("MyEncryptedSettingName", "MyEncryptedSettingValueDefault");
+				string unencryptedText = settings.GetEncryptedSetting(secret, "MyEncryptedSettingName", "MyEncryptedSettingValueDefault");
 			}
 		}
 	}

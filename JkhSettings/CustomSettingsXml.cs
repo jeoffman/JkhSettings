@@ -249,6 +249,46 @@ namespace JkhSettings
 			return retval;
 		}
 
+		public T GetEncryptedSetting<T>(string password, string xmlPath, T defaultValue)
+		{
+			T retval;
+			try
+			{
+				xmlPath = NormalizeXmlPathJkh(xmlPath);
+
+				XmlNode xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
+				if(xmlNode != null)
+				{
+					Type valueType = typeof(T);
+					try
+					{
+						string encryptedText = xmlNode.InnerText;
+						string decryptedText = AesThenHmac.SimpleDecryptWithPassword(encryptedText, password);
+
+						if(valueType.IsArray || valueType.IsGenericType)
+							retval = (T)GetArray<T>(decryptedText);
+						else
+							retval = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(decryptedText);
+					}
+					catch(InvalidOperationException exc)
+					{
+						_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting<{valueType}>({xmlPath}) Exception: {exc.Message}");
+						retval = defaultValue;
+					}
+				}
+				else
+				{
+					retval = defaultValue;
+				}
+			}
+			catch(XPathException exc)
+			{
+				_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting({xmlPath}) Exception: {exc.Message}");
+				retval = defaultValue;
+			}
+			return retval;
+		}
+
 		public void PutSetting(string xmlPath, object value)
 		{
 			if(value == null)
@@ -277,6 +317,42 @@ namespace JkhSettings
 				xmlNode.InnerText = PutArray(value);
 			else
 				xmlNode.InnerText = TypeDescriptor.GetConverter(valueType).ConvertToString(value);
+			if(AutoSaveSettingsMode)
+			{
+				//_watcher.EnableRaisingEvents = false;
+				xmlDocument.Save(DocumentPath);
+				//_watcher.EnableRaisingEvents = true;
+			}
+		}
+
+		public void PutEncryptedSetting(string password, string xmlPath, object value)
+		{
+			if(value == null)
+				throw new ArgumentNullException(nameof(value));
+
+			xmlPath = NormalizeXmlPathJkh(xmlPath);
+
+			XmlNode xmlNode = null;
+			try
+			{
+				xmlNode = xmlDocument.SelectSingleNode(SettingsNode + xmlPath);
+			}
+			catch(XPathException exc)
+			{
+				_traceSource.TraceEvent(TraceEventType.Error, 57, $"PutSetting({xmlPath}) Exception: {exc.Message}");
+			}
+
+			if(xmlNode == null)
+				xmlNode = CreateMissingNode(SettingsNode + xmlPath);
+
+			string unencryptedText;
+			Type valueType = value.GetType();
+			if(valueType.IsArray || valueType.IsGenericType)
+				unencryptedText = PutArray(value);
+			else
+				unencryptedText = TypeDescriptor.GetConverter(valueType).ConvertToString(value);
+			xmlNode.InnerText = AesThenHmac.SimpleEncryptWithPassword(unencryptedText, password);
+
 			if(AutoSaveSettingsMode)
 			{
 				//_watcher.EnableRaisingEvents = false;

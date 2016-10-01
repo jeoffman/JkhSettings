@@ -19,6 +19,7 @@
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
+      **Ver 0.9.8 = Wimpy encryption for strings
       **Ver 0.9.7 = Added some path finding to FormAbout user "settings" finder/explorer
       **Ver 0.9.6 = TraceListenerRtf has UninstallTraceListener and can call InstallTraceListener multiple times without duplicate messages
       **Ver 0.9.5 = Prefix trace output with date+time
