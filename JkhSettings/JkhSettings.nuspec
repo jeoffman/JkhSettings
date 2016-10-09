@@ -19,6 +19,7 @@
     </frameworkAssemblies>
     <tags>JkhSettings Jeoffman WinForms</tags>
     <releaseNotes>
+      **Ver 0.9.10 = Another fix for decrypting with a short salt
       **Ver 0.9.9 = Small fixes for encryption salt too small and bad defaults
       **Ver 0.9.8 = Wimpy encryption for strings
       **Ver 0.9.7 = Added some path finding to FormAbout user "settings" finder/explorer

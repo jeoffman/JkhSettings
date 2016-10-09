@@ -263,12 +263,7 @@ namespace JkhSettings
 					try
 					{
 						string encryptedText = xmlNode.InnerText;
-						for(int countUpTo12 = 1; countUpTo12 < 12; countUpTo12++)
-						{
-							password += password;
-							if(password.Length > 12)
-								break;
-						}
+						password = MakeSureSaltIsLongEnough(password);
 
 						string decryptedText = AesThenHmac.SimpleDecryptWithPassword(encryptedText, password);
 
@@ -297,6 +292,21 @@ namespace JkhSettings
 			{
 				_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting({xmlPath}) Exception: {exc.Message}");
 				retval = defaultValue;
+			}
+			return retval;
+		}
+
+		private static string MakeSureSaltIsLongEnough(string password)
+		{
+			string retval = password;
+			if(retval.Length < 12)
+			{
+				for(int countUpTo12 = 1; countUpTo12 < 12; countUpTo12++)
+				{
+					retval += retval;
+					if(retval.Length > 12)
+						break;
+				}
 			}
 			return retval;
 		}
@@ -363,6 +373,9 @@ namespace JkhSettings
 				unencryptedText = PutArray(value);
 			else
 				unencryptedText = TypeDescriptor.GetConverter(valueType).ConvertToString(value);
+
+			password = MakeSureSaltIsLongEnough(password);
+
 			xmlNode.InnerText = AesThenHmac.SimpleEncryptWithPassword(unencryptedText, password);
 
 			if(AutoSaveSettingsMode)
