@@ -133,7 +133,11 @@ namespace JkhSettings
 
 			var cipherText = Convert.FromBase64String(encryptedMessage);
 			var plainText = SimpleDecryptWithPassword(cipherText, password, nonSecretPayloadLength);
-			return Encoding.UTF8.GetString(plainText);
+
+			string retval = null;
+			if(plainText != null)
+				retval = Encoding.UTF8.GetString(plainText);
+			return retval;
 		}
 
 		/// <summary>

@@ -263,6 +263,13 @@ namespace JkhSettings
 					try
 					{
 						string encryptedText = xmlNode.InnerText;
+						for(int countUpTo12 = 1; countUpTo12 < 12; countUpTo12++)
+						{
+							password += password;
+							if(password.Length > 12)
+								break;
+						}
+
 						string decryptedText = AesThenHmac.SimpleDecryptWithPassword(encryptedText, password);
 
 						if(valueType.IsArray || valueType.IsGenericType)
@@ -282,6 +289,11 @@ namespace JkhSettings
 				}
 			}
 			catch(XPathException exc)
+			{
+				_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting({xmlPath}) Exception: {exc.Message}");
+				retval = defaultValue;
+			}
+			catch(ArgumentNullException exc)
 			{
 				_traceSource.TraceEvent(TraceEventType.Error, 57, $"GetSetting({xmlPath}) Exception: {exc.Message}");
 				retval = defaultValue;
