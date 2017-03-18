@@ -136,8 +136,6 @@ namespace JkhSettings
 
 		private XmlNode CreateMissingNode(string xmlPath)
 		{
-			xmlPath = NormalizeXmlPathJkh(xmlPath);
-
 			string[] xPathSections = xmlPath.Split('/');
 			StringBuilder currentXPath = new StringBuilder();
 			XmlNode testNode = null;
@@ -391,9 +389,8 @@ namespace JkhSettings
 			if(xmlPath == null)
 				throw new ArgumentNullException(nameof(xmlPath));
 
-			if(Char.IsNumber(xmlPath[0]))
-				xmlPath = "num" + xmlPath;
-			xmlPath = xmlPath.Replace(" ", "");
+			xmlPath = XmlConvert.EncodeLocalName(xmlPath);
+
 			return xmlPath;
 		}
 
