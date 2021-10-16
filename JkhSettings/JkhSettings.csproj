@@ -54,6 +54,7 @@
       <DependentUpon>FormAbout.cs</DependentUpon>
     </Compile>
     <Compile Include="RichTextBoxHelper.cs" />
+    <Compile Include="SettingsStaticHelpers.cs" />
     <Compile Include="TraceListenerRtf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializableDictionary.cs" />
