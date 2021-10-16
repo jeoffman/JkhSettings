@@ -30,7 +30,7 @@ using System.Drawing;   //Size
 
 namespace JkhSettings
 {
-	public class CustomSettingsBase : IDisposable
+    public class CustomSettingsBase : IDisposable
 	{
 		private TraceSource _traceSource = new TraceSource("JkhSettings");
 
@@ -566,8 +566,7 @@ namespace JkhSettings
 		{
 			if(formTarget != null)
 			{
-				string valueName = formTarget.Name + SizeSuffix;
-				Size formSize = GetSetting(valueName, formTarget.Size);
+				Size formSize = GetSetting(formTarget.Name + SizeSuffix, formTarget.Size);
 				if(!formSize.IsEmpty)
 					formTarget.Size = formSize;
 			}
@@ -582,24 +581,8 @@ namespace JkhSettings
 		{
 			if(target != null)
 			{
-				RectangleConverter converter = new RectangleConverter();
-
-				Rectangle rect;
-				Form formTarget = target as Form;
-				if(formTarget != null)
-				{
-					if(formTarget.WindowState == FormWindowState.Minimized)
-						rect = formTarget.RestoreBounds;
-					else
-						rect = target.Bounds;
-				}
-				else
-				{
-					rect = target.Bounds;
-				}
-
-				string formPosition = converter.ConvertToString(rect);
-				PutSetting(target.Name + WindowPlacementSuffix, formPosition);
+				string settingString = SettingsStaticHelpers.SaveWindowPlacement(target);
+				PutSetting(target.Name + WindowPlacementSuffix, settingString);
 			}
 		}
 
@@ -610,48 +593,8 @@ namespace JkhSettings
 				if(target != null)
 				{
 					RectangleConverter converter = new RectangleConverter();
-					Rectangle formBounds = (Rectangle)converter.ConvertFromString(GetSetting(target.Name + WindowPlacementSuffix, converter.ConvertToString(Rectangle.Empty)));
-					if(!formBounds.IsEmpty)
-					{
-						// Get the working area of the monitor that contains this rectangle
-						//  (in case it's a multi-display system)
-						Rectangle workingArea = Screen.GetWorkingArea(formBounds);
-
-						// If the bounds are outside of the screen's work area, move the
-						// formTarget so it's not outside of the work area. This can happen if the
-						// user changes their resolution and we then restore the application
-						// into its position — it may be off screen and then they can't see it
-						// or move it.
-						if(formBounds.Left < workingArea.Left)
-							formBounds.Location = new Point(workingArea.Location.X, formBounds.Location.Y);
-						if(formBounds.Top < workingArea.Top)
-							formBounds.Location = new Point(formBounds.Location.X, workingArea.Location.Y);
-						if(formBounds.Right > workingArea.Right)
-							formBounds.Location = new Point(formBounds.X - (formBounds.Right - workingArea.Right), formBounds.Location.Y);
-						if(formBounds.Bottom > workingArea.Bottom)
-							formBounds.Location = new Point(formBounds.X, formBounds.Y - (formBounds.Bottom - workingArea.Bottom));
-
-						Form formTarget = target as Form;
-						if(formTarget != null)
-						{
-							switch(formTarget.FormBorderStyle)
-							{
-								case FormBorderStyle.Sizable:
-								case FormBorderStyle.SizableToolWindow:
-									target.Bounds = formBounds;
-									break;
-								default:
-									formBounds.Width = target.Bounds.Width;
-									formBounds.Height = target.Bounds.Height;
-									target.Bounds = formBounds;
-									break;
-							}
-						}
-						else
-						{
-							target.Bounds = formBounds;
-						}
-					}
+					var settingString = GetSetting(target.Name + WindowPlacementSuffix, converter.ConvertToString(Rectangle.Empty));
+					SettingsStaticHelpers.RestoreWindowPlacement(target, settingString);
 				}
 			}
 			catch(Exception exc)
@@ -664,11 +607,8 @@ namespace JkhSettings
 		{
 			if(formTarget != null && formTarget.Owner != null)
 			{
-				Rectangle bounds = formTarget.Bounds;
-				bounds.Offset(-formTarget.Owner.Bounds.X, -formTarget.Owner.Bounds.Y);
-				RectangleConverter converter = new RectangleConverter();
-				string formPosition = converter.ConvertToString(bounds);
-				PutSetting(formTarget.Name + RelativeWindowPlacementSuffix, formPosition);
+				string settingString = SettingsStaticHelpers.SaveRelativeWindowPlacement(formTarget);
+				PutSetting(formTarget.Name + RelativeWindowPlacementSuffix, settingString);
 			}
 			else
 			{
@@ -681,31 +621,8 @@ namespace JkhSettings
 			if(formTarget != null && formTarget.Owner != null)
 			{
 				RectangleConverter converter = new RectangleConverter();
-				Rectangle formBounds = (Rectangle)converter.ConvertFromString(GetSetting(formTarget.Name + RelativeWindowPlacementSuffix, converter.ConvertToString(Rectangle.Empty)));
-				if(!formBounds.IsEmpty)
-				{
-					formBounds.Offset(+formTarget.Owner.Bounds.X, +formTarget.Owner.Bounds.Y);
-
-					// Get the working area of the monitor that contains this rectangle
-					//  (in case it’s a multi-display system)
-					Rectangle workingArea = Screen.GetWorkingArea(formBounds);
-
-					// If the bounds are outside of the screen’s work area, move the
-					// formTarget so it’s not outside of the work area. This can happen if the
-					// user changes their resolution and we then restore the application
-					// into its position — it may be off screen and then they can’t see it
-					// or move it.
-					if(formBounds.Left < workingArea.Left)
-						formBounds.Location = new Point(workingArea.Location.X, formBounds.Location.Y);
-					if(formBounds.Top < workingArea.Top)
-						formBounds.Location = new Point(formBounds.Location.X, workingArea.Location.Y);
-					if(formBounds.Right > workingArea.Right)
-						formBounds.Location = new Point(formBounds.X - (formBounds.Right - workingArea.Right), formBounds.Location.Y);
-					if(formBounds.Bottom > workingArea.Bottom)
-						formBounds.Location = new Point(formBounds.X, formBounds.Y - (formBounds.Bottom - workingArea.Bottom));
-
-					formTarget.Bounds = formBounds;
-				}
+				var settingString = GetSetting(formTarget.Name + RelativeWindowPlacementSuffix, converter.ConvertToString(Rectangle.Empty));
+				SettingsStaticHelpers.RestoreRelativeWindowPlacement(formTarget, settingString);
 			}
 			else
 			{
@@ -799,24 +716,9 @@ namespace JkhSettings
 #endregion ListView (Items)
 
 #region ListView (Column Widths)
-		public static string ColumnWidthsToString(ListView lv)
-		{
-			StringBuilder retval = new StringBuilder();
-			if(lv != null)
-			{
-				foreach(ColumnHeader column in lv.Columns)
-				{
-					if(retval.Length > 0)
-						retval.Append(",");
-					retval.Append(column.Width.ToString(CultureInfo.CurrentCulture));
-				}
-			}
-			return retval.ToString();
-		}
-
 		public void SaveColumnWidths(ListView lv)
 		{
-			string columnWidths = ColumnWidthsToString(lv);
+			string columnWidths = SettingsStaticHelpers.ColumnWidthsToString(lv);
 			PutSetting(GetControlUniversalName(lv) + ColumnWidthsSuffix, columnWidths);
 		}
 
@@ -826,28 +728,7 @@ namespace JkhSettings
 			if(lv != null)
 			{
 				string columnWidths = GetSetting(GetControlUniversalName(lv) + ColumnWidthsSuffix, "");
-
-				string[] widths = columnWidths.Split(',');
-				if(widths.Length > 0 && !string.IsNullOrEmpty(widths[0]))
-				{
-					for(int count = 0; count < widths.Length; count++)
-					{
-						if(lv.Columns.Count > count)
-						{
-							int width;
-							if(int.TryParse(widths[count].Trim(), out width))
-								lv.Columns[count].Width = width;
-							else
-								lv.Columns[count].Width = -1;	//autosize
-						}
-						else
-						{
-							//Debug.Assert(false);
-							break;	// too many initializers!
-						}
-					}
-					retval = widths.Length > 0;
-				}
+				retval = SettingsStaticHelpers.RestoreColumnWidths(lv, columnWidths);
 			}
 			return retval;
 		}
@@ -880,26 +761,7 @@ namespace JkhSettings
 			if(control != null && callback != null)
 			{
 				string columnWidths = GetSetting(GetControlUniversalName(control) + ColumnWidthsSuffix, "");
-
-				string[] widthTexts = columnWidths.Split(',');
-				if(widthTexts.Length > 0)
-				{
-					int[] widths = new int[widthTexts.Length];
-					retval = true;
-					for(int count = 0; count < widthTexts.Length; count++)
-					{
-						if(!int.TryParse(widthTexts[count].Trim(), out widths[count]))
-						{
-							widths[count] = -1;	// autosize
-							retval = false;
-						}
-					}
-					retval &= callback(widths);
-				}
-				else
-				{
-					callback(null);
-				}
+				retval = SettingsStaticHelpers.RestoreColumnWidths(callback, columnWidths);
 			}
 			return retval;
 		}
@@ -921,26 +783,7 @@ namespace JkhSettings
 			if(control != null && callback != null)
 			{
 				string columnWidths = GetSetting(GetControlUniversalName(control) + ColumnWidthsSuffix, "");
-
-				string[] widthTexts = columnWidths.Split(',');
-				if(widthTexts.Length > 0 && !string.IsNullOrEmpty(widthTexts[0]))
-				{
-					int[] widths = new int[widthTexts.Length];
-					retval = true;
-					for(int count = 0; count < widthTexts.Length; count++)
-					{
-						if(!int.TryParse(widthTexts[count].Trim(), out widths[count]))
-						{
-							widths[count] = -1;	// autosize
-							retval = false;
-						}
-					}
-					retval &= callback.RestoreColumnWidths(widths);
-				}
-				else
-				{
-					callback.RestoreColumnWidths(null);
-				}
+				retval = SettingsStaticHelpers.RestoreColumnWidths(callback, columnWidths);
 			}
 			return retval;
 		}
@@ -970,24 +813,9 @@ namespace JkhSettings
 #endregion ComboBoxItems
 
 #region DataGridView (Column Widths)
-		public static string ColumnWidthsToString(DataGridView dataGridView)
-		{
-			StringBuilder retval = new StringBuilder();
-			if(dataGridView != null)
-			{
-				foreach(DataGridViewColumn column in dataGridView.Columns)
-				{
-					if(retval.Length > 0)
-						retval.Append(",");
-					retval.Append(column.Width.ToString(CultureInfo.CurrentCulture));
-				}
-			}
-			return retval.ToString();
-		}
-
 		public void SaveColumnWidths(DataGridView dataGridView, string keyTag)
 		{
-			string columnWidths = ColumnWidthsToString(dataGridView);
+			string columnWidths = SettingsStaticHelpers.ColumnWidthsToString(dataGridView);
 			PutSetting(GetControlUniversalName(dataGridView) + "_" + keyTag + ColumnWidthsSuffix, columnWidths.ToString());
 		}
 
@@ -997,23 +825,7 @@ namespace JkhSettings
 			if(dataGridView != null)
 			{
 				string columnWidths = GetSetting(GetControlUniversalName(dataGridView) + "_" + keyTag + ColumnWidthsSuffix, "");
-
-				string[] widths = columnWidths.Split(',');
-				for(int count = 0; count < widths.Length; count++)
-				{
-					if(dataGridView.Columns.Count > count)
-					{
-						int width;
-						if(int.TryParse(widths[count].Trim(), out width))
-							dataGridView.Columns[count].Width = width;
-					}
-					else
-					{
-						_traceSource.TraceEvent(TraceEventType.Error, 57, "CustomSettingsXML-RestoreColumnWidths too many initializers for " + GetControlUniversalName(dataGridView));
-						break;	// too many initializers!
-					}
-				}
-				retval = widths.Length > 0;
+				retval = SettingsStaticHelpers.RestoreColumnWidths(dataGridView, columnWidths);
 			}
 			return retval;
 		}
